@@ -31,7 +31,11 @@ export const TodoForm = ({ isLoading, handleCreate }: FormProps) => {
   return (
     <FormControl
       component="form"
-      sx={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '16px',
+      }}
       onSubmit={() => handleCreate(name)}
     >
       <TextField

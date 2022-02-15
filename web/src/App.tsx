@@ -1,8 +1,15 @@
-import { Container } from '@mui/material';
+import './App.css';
 import React, { useEffect, useReducer, useMemo, Dispatch } from 'react';
 import { ITodo, Todos } from './todos';
-import './App.css';
-import { removeArrayDuplicates, sortByKey } from './utils';
+import {
+  insureSorted,
+  removeArrayDuplicates,
+  reorder,
+  sortByKey,
+} from './utils';
+import { DropResult } from 'react-beautiful-dnd';
+import { Global } from '@emotion/react';
+import { Box } from '@mui/material';
 
 // https://medium.com/codex/typescript-and-react-usereducer-943e4f8d1ad4
 export enum ReducerActionType {
@@ -25,7 +32,11 @@ interface State {
 type Action =
   | { type: 'request' }
   | { type: 'success'; payload: ITodo[] }
-  | { type: 'failure'; payload: string };
+  | { type: 'failure'; payload: string }
+  // There is a way to make a mixin of sorts with request, success, and failure actions. Should be implemented here
+  | { type: 'requestReorder'; payload: ITodo[] } // Ordered locally. The old list is stored in memory
+  | { type: 'successReorder' } // Everything is fine
+  | { type: 'failureReorder'; payload: { todos: ITodo[]; message: string } }; // Revert to old list
 
 const initialState: State = {
   todos: [],
@@ -38,7 +49,12 @@ const endPoint = 'http://localhost:5000/todos';
 const getTodos = (dispatch: Dispatch<Action>) => async (): Promise<void> => {
   dispatch({ type: 'request' });
   fetch(endPoint)
-    .then((res): Promise<{ todos: ITodo[] }> => res.json())
+    .then((res): Promise<{ todos: ITodo[] }> => {
+      if (res.ok) {
+        return res.json();
+      }
+      throw new Error('Network error');
+    })
     .then((res) => {
       dispatch({ type: 'success', payload: res.todos });
     })
@@ -58,7 +74,12 @@ const createTodo =
       },
       body: JSON.stringify(data),
     })
-      .then((res): Promise<{ todo: ITodo }> => res.json())
+      .then((res): Promise<{ todo: ITodo }> => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('Network error');
+      })
       .then((res) => {
         dispatch({ type: 'success', payload: [res.todo] });
       })
@@ -78,12 +99,50 @@ const updateTodo =
       },
       body: JSON.stringify(data),
     })
-      .then((res): Promise<{ todo: ITodo }> => res.json())
+      .then((res): Promise<{ todo: ITodo }> => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('Network error');
+      })
       .then((res) => {
         dispatch({ type: 'success', payload: [res.todo] });
       })
       .catch((err) => {
         dispatch({ type: 'failure', payload: err.message });
+      });
+  };
+const reorderTodo =
+  (dispatch: Dispatch<Action>) =>
+  async (
+    todos: ITodo[],
+    source: number,
+    destination: number
+  ): Promise<void> => {
+    const reorderTodos = reorder(todos, source, destination);
+    const newTodos = insureSorted(reorderTodos, 'sort');
+    dispatch({ type: 'requestReorder', payload: newTodos });
+    fetch(`${endPoint}/reorder`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newTodos),
+    })
+      .then((res): Promise<void> => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('Network error');
+      })
+      .then((res) => {
+        dispatch({ type: 'successReorder' });
+      })
+      .catch((err) => {
+        dispatch({
+          type: 'failureReorder',
+          payload: { todos, message: err.message },
+        });
       });
   };
 
@@ -92,20 +151,51 @@ const reducer = (state: State, action: Action): State => {
     case 'request':
       return { ...state, ...{ isLoading: true } };
     case 'success':
+      // A pipe operator from lodash or Ramda would be nice here
+      const dedupe = removeArrayDuplicates(state.todos, action.payload, 'id');
+      const sorted = sortByKey(dedupe, 'sort');
+      const insureUniqueSort = insureSorted(sorted, 'sort');
       return {
         isLoading: false,
         error: null,
-        todos: sortByKey(
-          removeArrayDuplicates(state.todos, action.payload, 'id'),
-          'id'
-        ),
+        todos: insureUniqueSort,
       }; // Mix payload without duplicates
     case 'failure':
       return { ...state, ...{ isLoading: false, error: action.payload } };
+    case 'requestReorder':
+      return { ...state, ...{ todos: action.payload, isLoading: true } };
+    case 'successReorder':
+      return { ...state, ...{ isLoading: false } };
+    case 'failureReorder':
+      return {
+        ...state,
+        ...{
+          todos: action.payload.todos,
+          isLoading: false,
+          error: action.payload.message,
+        },
+      };
     default:
       return state;
   }
 };
+
+const GlobalStyled = () => (
+  <Global
+    styles={{
+      '*': {
+        margin: 0,
+        padding: 0,
+        boxSizing: 'border-box',
+      },
+      '#root, body, html': {
+        background: '#d6d6d6',
+        fontFamily: 'sans-serif',
+      },
+      '#root': {},
+    }}
+  />
+);
 
 function App() {
   const [{ todos, isLoading }, dispatch] = useReducer(reducer, initialState);
@@ -116,9 +206,16 @@ function App() {
       getTodos: getTodos(dispatch),
       createTodo: createTodo(dispatch),
       updateTodo: updateTodo(dispatch),
+      reorderTodo: reorderTodo(dispatch),
     }),
     [dispatch]
   );
+
+  const onDragEnd = ({ destination, source }: DropResult) => {
+    // dropped outside the list
+    if (!destination) return;
+    thunks.reorderTodo(todos, source.index, destination.index);
+  };
 
   const handleCreate = (name: string) => {
     // e.preventDefault();
@@ -134,10 +231,6 @@ function App() {
     thunks.updateTodo(todo);
   };
 
-  const handleReorder = (e: any): void => {
-    // save a bunch of todo deltas to the database
-  };
-
   useEffect(() => {
     let didCancel = false;
     if (!didCancel) {
@@ -149,15 +242,24 @@ function App() {
   }, [thunks]);
 
   return (
-    <Container>
+    <Box
+      component="main"
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        flexGrow: 1,
+        py: 1,
+      }}
+    >
+      <GlobalStyled />
       <Todos
         todos={todos}
+        onDragEnd={onDragEnd}
         isLoading={isLoading}
         handleCreate={handleCreate}
         handleUpdate={handleUpdate}
-        handleReorder={handleReorder}
       />
-    </Container>
+    </Box>
   );
 }
 
