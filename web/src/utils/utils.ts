@@ -37,3 +37,20 @@ export const sortByKey = <T, U extends keyof T>(
     return 0;
   });
 };
+
+// https://codesandbox.io/s/draggable-material-ui-oj3wz?file=/src/helpers.ts:28-325
+// a little function to help us with reordering the result [Don't need this for our use case]
+export const reorder = <T>(
+  list: T[],
+  startIndex: number,
+  endIndex: number
+): T[] => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
+
+export const insureSorted = <T>(A: T[], key: string) =>
+  A.map<T>((a, index) => Object.assign({}, a, { [key]: index }));

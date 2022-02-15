@@ -1,21 +1,33 @@
-import { List } from '@mui/material';
 import React from 'react';
+import { List, Paper } from '@mui/material';
+import styled from '@emotion/styled/macro';
+import {
+  DragDropContext,
+  Droppable,
+  OnDragEndResponder,
+} from 'react-beautiful-dnd';
 import { Todo, ITodo } from './Todo';
 import { TodoForm } from './TodoForm';
 
 interface Props {
   todos: ITodo[];
+  onDragEnd: OnDragEndResponder;
   handleCreate: (name: string) => void; //React.FormEventHandler<HTMLFormElement>;
   handleUpdate: (todo: ITodo) => void;
-  handleReorder: (e: any) => void;
   isLoading: boolean;
 }
 
+const PaperStyled = styled(Paper)`
+  margin: 16px;
+  min-width: 350px;
+  max-width: 600px;
+`;
+
 export const Todos: React.FC<Props> = ({
   todos,
+  onDragEnd,
   handleCreate,
   handleUpdate,
-  handleReorder,
   isLoading,
 }) => {
   // handleReorder will exist here?
@@ -24,20 +36,24 @@ export const Todos: React.FC<Props> = ({
   // Also clear text field after successful handleCreate
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <List
-        dense
-        sx={{ width: '100%', maxWidth: '400px', bgcolor: 'background.paper' }}
-      >
-        {Array.isArray(todos) && todos.length ? (
-          todos.map((item: any) => (
-            <Todo key={item.id} todo={item} handleUpdate={handleUpdate} />
-          ))
-        ) : (
-          <span>Make a more meaningful empty text</span>
-        )}
-        <TodoForm handleCreate={handleCreate} isLoading={isLoading} />
-      </List>
-    </div>
+    <PaperStyled>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="droppable-list">
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {Array.isArray(todos) && todos.length ? (
+                todos.map((item: any) => (
+                  <Todo key={item.id} todo={item} handleUpdate={handleUpdate} />
+                ))
+              ) : (
+                <span>Make a more meaningful empty text</span>
+              )}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+      <TodoForm handleCreate={handleCreate} isLoading={isLoading} />
+    </PaperStyled>
   );
 };

@@ -1,7 +1,13 @@
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
-import { Connection, createConnection, QueryFailedError } from 'typeorm';
+import {
+  Connection,
+  createConnection,
+  getConnection,
+  getManager,
+  QueryFailedError,
+} from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { Todo } from './models/todo';
 import { validate } from 'class-validator';
@@ -55,6 +61,27 @@ const api = (connection: Connection) => {
     setTimeout(() => {
       res.status(201).send({ todo: model });
     }, 500);
+  });
+
+  // Reorder
+  app.post('/todos/reorder', async (req, res) => {
+    if (!req.body || !Array.isArray(req.body)) {
+      return res.status(401).send({ success: false });
+    }
+    try {
+      await connection
+        .createQueryBuilder()
+        .insert()
+        .into(Todo)
+        .values(req.body)
+        .onConflict(`("id") DO UPDATE SET "sort" = excluded."sort"`)
+        .execute();
+      setTimeout(() => {
+        res.status(201).send({ success: false });
+      }, 500);
+    } catch (error) {
+      return res.status(401).send({ success: false });
+    }
   });
 };
 
