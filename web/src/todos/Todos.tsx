@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, Paper } from '@mui/material';
+import { Paper } from '@mui/material';
 import styled from '@emotion/styled/macro';
 import {
   DragDropContext,

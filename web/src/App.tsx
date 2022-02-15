@@ -29,8 +29,6 @@ interface State {
   error?: string | null;
 }
 
-type TodoSort = { id: number; sort: number }[];
-
 type Action =
   | { type: 'request' }
   | { type: 'success'; payload: ITodo[] }
