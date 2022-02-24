@@ -3,7 +3,7 @@ import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { CreateTodoDto, UpdateTodoDto } from './dto';
 import { TodosArgs } from './dto/todos.args';
-import { Todo } from './todo.model';
+import { Todo } from './entities/todo.entity';
 import { TodosService } from './todos.service';
 
 const pubSub = new PubSub();
@@ -28,7 +28,7 @@ export class TodosResolver {
 
   @Mutation((returns) => Todo)
   async createTodo(
-    @Args('newTodoData') newTodoData: CreateTodoDto
+    @Args('newTodoData') newTodoData: CreateTodoDto,
   ): Promise<Todo> {
     const todo = await this.todosService.create(newTodoData);
     // pubSub.publish('todoCreated', { todoCreated: todo });
@@ -37,7 +37,7 @@ export class TodosResolver {
 
   @Mutation((returns) => Todo)
   async updateTodo(
-    @Args('updateTodoData') updateTodoData: UpdateTodoDto
+    @Args('updateTodoData') updateTodoData: UpdateTodoDto,
   ): Promise<Todo> {
     const todo = await this.todosService.update(updateTodoData);
     return todo;

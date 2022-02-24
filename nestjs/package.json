@@ -16,6 +16,7 @@
     "schema:drop": "npm run typeorm -- schema:drop",
     "seed:config": "npm run seeds -- config",
     "seed:run": "npm run seeds -- seed",
+    "seed:generate": "npm run typeorm seed -n",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
