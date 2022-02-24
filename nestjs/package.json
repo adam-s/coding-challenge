@@ -16,7 +16,6 @@
     "schema:drop": "npm run typeorm -- schema:drop",
     "seed:config": "npm run seeds -- config",
     "seed:run": "npm run seeds -- seed",
-    "seed:generate": "npm run typeorm seed -n",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -29,7 +28,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "env-cmd jest --config ./test/jest-e2e.json"
+    "test:e2e": "env-cmd jest --config ./test/jest-e2e.json",
+    "test:all": "npm run schema:drop && npm run migration:run && npm run seed:run && npm run test:e2e"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "1.6.1",

@@ -3,12 +3,11 @@ import { Max, Min } from 'class-validator';
 
 @ArgsType()
 export class TodosArgs {
-  @Field((type) => Int)
-  @Min(0)
-  skip = 0;
-
-  @Field((type) => Int)
+  @Field((type) => Int, { defaultValue: 1 })
   @Min(1)
-  @Max(50)
-  take = 25;
+  page = 1;
+
+  @Field((type) => Int, { defaultValue: 25 })
+  @Min(1)
+  limit = 25;
 }

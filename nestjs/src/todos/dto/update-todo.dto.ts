@@ -1,9 +1,10 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { MaxLength } from 'class-validator';
+import { IsBoolean, IsNumber, IsString, MaxLength } from 'class-validator';
 
 @InputType()
 export class UpdateTodoDto {
   @Field()
+  @IsString()
   id: string;
 
   @Field({ nullable: true })
@@ -11,8 +12,10 @@ export class UpdateTodoDto {
   name?: string;
 
   @Field((type) => Boolean, { nullable: true })
+  @IsBoolean()
   completed?: boolean;
 
   @Field((type) => Int, { nullable: true })
+  @IsNumber()
   sort?: number;
 }

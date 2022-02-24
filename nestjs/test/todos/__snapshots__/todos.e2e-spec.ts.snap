@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Todos (e2e) should find and return all todos 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "completed": false,
+      "id": "1",
+      "name": "Get all contingencies squared away",
+      "sort": 0,
+    },
+    Object {
+      "completed": false,
+      "id": "2",
+      "name": "Clear the title",
+      "sort": 1,
+    },
+    Object {
+      "completed": false,
+      "id": "3",
+      "name": "Get final mortgage approval",
+      "sort": 2,
+    },
+    Object {
+      "completed": false,
+      "id": "4",
+      "name": "Review your closing disclosure",
+      "sort": 3,
+    },
+    Object {
+      "completed": false,
+      "id": "5",
+      "name": "Do a final walk-through",
+      "sort": 4,
+    },
+    Object {
+      "completed": false,
+      "id": "6",
+      "name": "Bring the necessary documentation to closing",
+      "sort": 5,
+    },
+    Object {
+      "completed": false,
+      "id": "7",
+      "name": "updated todo",
+      "sort": 0,
+    },
+  ],
+}
+`;

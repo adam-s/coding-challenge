@@ -10,9 +10,15 @@ type Todo {
   sort: Int!
 }
 
+"""paginated todos"""
+type PaginatedTodos {
+  data: [Todo!]!
+  hasNextPage: Boolean!
+}
+
 type Query {
   todo(id: String!): Todo!
-  todos(skip: Int = 0, take: Int = 25): [Todo!]!
+  todos(page: Int = 1, limit: Int = 25): PaginatedTodos!
 }
 
 type Mutation {

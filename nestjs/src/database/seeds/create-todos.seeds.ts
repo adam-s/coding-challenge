@@ -5,6 +5,9 @@ import { Todo } from 'src/todos/entities/todo.entity';
 
 export default class CreateAdmin implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<void> {
+    // If running tests comment this out before running the tests to reseed the database
+    // There has to be a better way to do this. Perhaps making a connection in the tests to seed them.
+    // await connection.query('TRUNCATE TABLE todo RESTART IDENTITY;');
     const countUser = await connection
       .createQueryBuilder()
       .select()
