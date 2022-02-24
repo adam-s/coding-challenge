@@ -6,7 +6,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "postinstall": "is-ci || husky install",
     "pretypeorm": "ts-node -r tsconfig-paths/register ./src/database/scripts/copy-typeorm-config.ts",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "seeds": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js",
