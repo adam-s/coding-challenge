@@ -7,6 +7,8 @@ import { CreateTodoDto } from 'src/todos/dto/create-todo.dto';
 import { TodosArgs } from 'src/todos/dto/todos.args';
 import { TodosService } from 'src/todos/todos.service';
 
+import { Connection, getConnection } from 'typeorm';
+
 const fakeTodos = [
   {
     id: '0',
@@ -49,6 +51,8 @@ describe('TodosResolver e2e', () => {
   });
 
   afterAll(async () => {
+    const defaultConnection = getConnection('default');
+    await defaultConnection.close();
     await app.close();
   });
 
