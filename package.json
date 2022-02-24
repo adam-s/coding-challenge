@@ -4,10 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "deps": "yarn && (cd api && yarn) &&(cd web && yarn)",
+    "deps": "yarn && (cd api && yarn) &&(cd web && yarn) && (cd server && yarn)",
     "api": "cd api && nodemon",
+    "server": "cd server && yarn start:dev",
     "web": "cd web && yarn start",
-    "start": "concurrently --kill-others-on-fail \"yarn api\" \"yarn web\"",
+    "start": "concurrently --kill-others-on-fail \"yarn server\" \"yarn web\"",
     "test": "cd api && jest '**/spec.ts'"
   },
   "devDependencies": {

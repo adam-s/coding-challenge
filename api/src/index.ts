@@ -1,13 +1,7 @@
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
-import {
-  Connection,
-  createConnection,
-  getConnection,
-  getManager,
-  QueryFailedError,
-} from 'typeorm';
+import { Connection, createConnection } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { Todo } from './models/todo';
 import { validate } from 'class-validator';

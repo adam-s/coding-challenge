@@ -1,2 +1,2 @@
-pid=$(lsof -i:5000 -t); kill -TERM $pid || kill -KILL $pid
+pid=$(lsof -i:3000 -t); kill -TERM $pid || kill -KILL $pid
 yarn jest
