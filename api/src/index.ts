@@ -66,9 +66,10 @@ const api = (connection: Connection) => {
   // Reorder
   app.post('/todos/reorder', async (req, res) => {
     if (!req.body || !Array.isArray(req.body)) {
-      return res.status(401).send({ success: false });
+      return res.status(400).send({ success: false });
     }
     try {
+      if (Math.random() > 0.5) throw new Error('Bad luck. Try again.');
       await connection
         .createQueryBuilder()
         .insert()
@@ -80,7 +81,7 @@ const api = (connection: Connection) => {
         res.status(201).send({ success: false });
       }, 500);
     } catch (error) {
-      return res.status(401).send({ success: false });
+      return res.status(400).send({ success: false });
     }
   });
 };
